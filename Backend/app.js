@@ -4,13 +4,16 @@ const path = require("path")
 const dotenv = require('dotenv')
 const cors = require("cors")
 const dotenv1 = require("dotenv").config()
-// const connectDB = require("./src/config/db")
+const connectDB = require("./src/config/db")
 const port = process.env.port
-// connectDB()
+connectDB()
 
+const userouter = require("./src/router/userouter")
 
 app.use(cors())
 app.use(express.json())
+app.use("/",userouter)
+
 
 app.listen(port,()=>{
 
