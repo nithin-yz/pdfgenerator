@@ -4,31 +4,26 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { cn } from '@/lib/utils';
-import { Logo } from './Logo';
+// import { Logo } from './Logo';
 import axios from 'axios';
-import { useDispatch } from 'react-redux';
-import { setToken } from '@/redux/slices/authSlice';
-import Swal from 'sweetalert2'; // SweetAlert2 import
-import { useNavigate } from 'react-router-dom'; // Use this for redirection
+import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 export function SignUpForm() {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null); // To display any error messages
-  const dispatch = useDispatch();
-  const navigate = useNavigate(); // For redirection
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); // Prevent the default form submission
-    console.log("Form submitted"); // Check if this logs
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); // Prevent default form submission
     setIsLoading(true);
-    setError(null); // Clear any previous errors
+    setError(null);
 
-    const form = new FormData(e.target as HTMLFormElement);
+    const form = new FormData(e.currentTarget);
     const name = form.get('name') as string;
     const email = form.get('email') as string;
     const password = form.get('password') as string;
-
-    console.log("Form Data:", { name, email, password }); // Check form data
+console.log(form,'data');
 
     try {
       const response = await axios.post('http://localhost:5000/api/register', {
@@ -37,23 +32,20 @@ export function SignUpForm() {
         password,
       });
 
-      console.log("API Response:", response.data); // Check API response
-
       Swal.fire({
         title: 'Registration Successful!',
         text: 'You have successfully registered. Please log in.',
         icon: 'success',
         confirmButtonText: 'Login',
       }).then(() => {
-        // Redirect to the login page after successful registration
-        navigate('/login');
+        navigate('/login'); 
       });
-    } catch (error: any) {
-      console.error("Registration error:", error); // Check the error
-      setError(error.response?.data?.message || 'Registration failed');
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || 'Registration failed';
+      setError(errorMessage);
       Swal.fire({
         title: 'Error!',
-        text: error.response?.data?.message || 'Registration failed, please try again.',
+        text: errorMessage,
         icon: 'error',
         confirmButtonText: 'Close',
       });
@@ -64,7 +56,6 @@ export function SignUpForm() {
 
   return (
     <div className="w-full max-w-md mx-auto space-y-6">
-      <Logo />
       <Card className="border-0 shadow-2xl bg-gray-800/50 backdrop-blur">
         <CardHeader>
           <CardTitle className="text-2xl text-white">Sign up to begin journey</CardTitle>
@@ -122,16 +113,17 @@ export function SignUpForm() {
             </div>
 
             {error && <div className="text-sm text-red-400">{error}</div>}
+
+            <Button
+              type="submit"
+              className="w-full sm:w-auto bg-lime-500 hover:bg-lime-600 text-gray-900 font-semibold"
+              disabled={isLoading}
+            >
+              {isLoading ? "Registering..." : "Register"}
+            </Button>
           </form>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
-          <Button
-            type="submit"
-            className="w-full sm:w-auto bg-lime-500 hover:bg-lime-600 text-gray-900 font-semibold"
-            disabled={isLoading}
-          >
-            {isLoading ? "Registering..." : "Register"}
-          </Button>
           <div className="text-sm text-gray-400">
             Already have an account?{" "}
             <a href="/login" className="text-lime-400 hover:text-lime-300">
