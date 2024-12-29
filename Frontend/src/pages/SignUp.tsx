@@ -5,7 +5,11 @@ import { Bg } from "./../assets";
 export function SignUpPage() {
   return (
     <>
-      <Header />
+      <Header buttonProps={{
+    name: 'Login',
+    link: "/login",
+    className: 'bg-[#a0f465] text-black font-semibold',
+  }} />
       <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 w-full h-screen flex flex-col md:flex-row">
         {/* Left Section: SignUpForm */}
         <div className="w-full md:w-1/2 flex justify-center items-center p-4">

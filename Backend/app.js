@@ -12,7 +12,7 @@ const userouter = require("./src/router/userouter")
 
 app.use(cors())
 app.use(express.json())
-app.use("/",userouter)
+app.use("/api",userouter)
 
 
 app.listen(port,()=>{

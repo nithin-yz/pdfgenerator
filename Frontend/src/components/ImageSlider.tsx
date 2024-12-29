@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { Button } from './ui/button';
 
@@ -25,11 +25,6 @@ export function ImageSlider({ slides }: ImageSliderProps) {
     const newIndex = isLastSlide ? 0 : currentIndex + 1;
     setCurrentIndex(newIndex);
   };
-
-  useEffect(() => {
-    const timer = setInterval(goToNext, 5000);
-    return () => clearInterval(timer);
-  }, [currentIndex]);
 
   return (
     <div className="relative h-full w-full group">

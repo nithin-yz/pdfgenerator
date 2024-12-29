@@ -1,23 +1,59 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { setToken } from '@/redux/slices/authSlice';  // Import the action
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { cn } from '@/lib/utils';
 import { Logo } from './Logo';
+import axios from 'axios';
+import Swal from 'sweetalert2';  // Import SweetAlert2
 
 export function LoginForm() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();  // Initialize the dispatch function
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsLoading(false);
-    navigate('/products');
+
+    try {
+      // Make API call to the backend
+      const response = await axios.post('http://localhost:5000/api/login', { email, password });
+
+      // Assuming the response contains a token
+      const { token } = response.data;
+
+      // Dispatch action to store the token in Redux state
+      dispatch(setToken(token));
+
+      // After successful login, navigate to the products page
+      navigate('/products');
+    } catch (error) {
+      console.error('Login failed:', error);
+
+      // Use SweetAlert2 to display an error message
+      let errorMessage = 'Something went wrong. Please try again.';
+      if (axios.isAxiosError(error) && error.response) {
+        // Check if the error has a response from the server
+        errorMessage = error.response.data?.message || errorMessage; // Backend error message
+      }
+
+      // Show SweetAlert2 with the error message
+      Swal.fire({
+        icon: 'error',
+        title: 'Login Failed',
+        text: errorMessage,  // Display the error message
+        confirmButtonText: 'Try Again',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -27,7 +63,7 @@ export function LoginForm() {
         <CardHeader>
           <CardTitle className="text-2xl text-white">Let the Journey Begin!</CardTitle>
           <CardDescription className="text-gray-400">
-            This is basic login page which is used for levitation assignment purpose.
+            This is a basic login page used for the levitation assignment.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -37,6 +73,8 @@ export function LoginForm() {
               <Input
                 id="email"
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}  // Set email state
                 placeholder="Enter Email ID"
                 required
                 className={cn(
@@ -52,6 +90,8 @@ export function LoginForm() {
               <Input
                 id="password"
                 type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}  // Set password state
                 placeholder="Enter the Password"
                 required
                 className={cn(

@@ -1,17 +1,19 @@
 import { useState } from 'react';
 import { LoginForm } from "@/components/LoginForm";
 import { ImageSlider } from "@/components/ImageSlider";
+import first from "./../assets/Frame 1707478310.png"
+import second from "./../assets/slider.png";
 
 export function LoginPage() {
   const slides = [
     {
-      url: "https://images.unsplash.com/photo-1497366216548-37526070297c",
-      title: "Connecting People with Technology"
+      url: second, // Corrected: Directly use the imported variable
+      title: "Connecting People with Technology",
     },
     {
-      url: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d",
-      title: "Streamline Your Business"
-    }
+      url: first, // Corrected: Directly use the imported variable
+      title: "Streamline Your Business",
+    },
   ];
 
   return (

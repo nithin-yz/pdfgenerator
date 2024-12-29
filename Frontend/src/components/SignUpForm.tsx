@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { cn } from '@/lib/utils';
-// import { Logo } from './Logo';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
@@ -23,7 +22,16 @@ export function SignUpForm() {
     const name = form.get('name') as string;
     const email = form.get('email') as string;
     const password = form.get('password') as string;
-console.log(form,'data');
+
+    // Regex for Gmail validation
+    const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+
+    // Validate email
+    if (!gmailRegex.test(email)) {
+      setError('Please enter a valid Gmail address.');
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const response = await axios.post('http://localhost:5000/api/register', {
@@ -38,7 +46,7 @@ console.log(form,'data');
         icon: 'success',
         confirmButtonText: 'Login',
       }).then(() => {
-        navigate('/login'); 
+        navigate('/login');
       });
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'Registration failed';
@@ -58,9 +66,9 @@ console.log(form,'data');
     <div className="w-full max-w-md mx-auto space-y-6">
       <Card className="border-0 shadow-2xl bg-gray-800/50 backdrop-blur">
         <CardHeader>
-          <CardTitle className="text-2xl text-white">Sign up to begin journey</CardTitle>
+          <CardTitle className="text-2xl text-white">Sign up to begin your journey</CardTitle>
           <CardDescription className="text-gray-400">
-            This is basic signup page which is used for levitation assignment purpose.
+            This is a basic signup page used for the levitation assignment purpose.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -77,7 +85,7 @@ console.log(form,'data');
                   "placeholder:text-gray-400 focus:ring-lime-400/50"
                 )}
               />
-              <p className="text-sm text-gray-400">This name will be displayed with your inquiry</p>
+              <p className="text-sm text-gray-400">This name will be displayed with your inquiry.</p>
             </div>
 
             <div className="space-y-2">
@@ -90,10 +98,11 @@ console.log(form,'data');
                 required
                 className={cn(
                   "bg-gray-700/50 border-gray-600 text-white",
+                  error && "border-red-500", // Add red border on error
                   "placeholder:text-gray-400 focus:ring-lime-400/50"
                 )}
               />
-              <p className="text-sm text-gray-400">This email will be displayed with your inquiry</p>
+              <p className="text-sm text-gray-400">This email must be a valid Gmail address.</p>
             </div>
 
             <div className="space-y-2">
@@ -109,7 +118,7 @@ console.log(form,'data');
                   "placeholder:text-gray-400 focus:ring-lime-400/50"
                 )}
               />
-              <p className="text-sm text-gray-400">Any further updates will be forwarded on this Email ID</p>
+              <p className="text-sm text-gray-400">Any further updates will be forwarded to this email ID.</p>
             </div>
 
             {error && <div className="text-sm text-red-400">{error}</div>}

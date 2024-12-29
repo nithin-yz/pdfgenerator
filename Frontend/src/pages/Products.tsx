@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { addProduct } from '../redux/slices/productslice';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -7,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { PlusCircleIcon } from 'lucide-react';
 import { Logo } from '@/components/Logo';
+import axios from 'axios';
 
 interface Product {
   id: number;
@@ -16,21 +19,24 @@ interface Product {
 }
 
 export function ProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
   const [newProduct, setNewProduct] = useState({ name: '', price: '', quantity: '' });
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const products = useSelector((state: any) => state.products.products);
+  const token = useSelector((state: any) => state.auth.token);
 
   const handleAddProduct = () => {
     if (newProduct.name && newProduct.price && newProduct.quantity) {
-      setProducts([
-        ...products,
-        {
-          id: Date.now(),
-          name: newProduct.name,
-          price: Number(newProduct.price),
-          quantity: Number(newProduct.quantity),
-        },
-      ]);
+      const productData = {
+        id: Date.now(),
+        name: newProduct.name,
+        price: Number(newProduct.price),
+        quantity: Number(newProduct.quantity),
+        total: Number(newProduct.price) * Number(newProduct.quantity),
+        gst: (Number(newProduct.price) * Number(newProduct.quantity)) * 0.18,
+      };
+
+      dispatch(addProduct(productData));
       setNewProduct({ name: '', price: '', quantity: '' });
     }
   };
@@ -41,16 +47,34 @@ export function ProductsPage() {
     return { subtotal, gst, total: subtotal + gst };
   };
 
+  const generatePDFInvoice = async () => {
+    try {
+      const response = await axios.post('http://localhost:5000/api/products', products, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Include token in the Authorization header
+        },
+        responseType: 'blob', // Expect the response to be a file (PDF)
+      });
+  
+      // Create a download link for the PDF file
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'invoice.pdf');  // Specify the file name
+      document.body.appendChild(link);
+      link.click();
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    }
+  };
+  
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-4">
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <Logo />
-          <Button 
-            variant="ghost" 
-            className="text-lime-400 hover:text-lime-300"
-            onClick={() => navigate('/login')}
-          >
+          <Button variant="ghost" className="text-lime-400 hover:text-lime-300" onClick={() => navigate('/login')}>
             Logout
           </Button>
         </div>
@@ -97,10 +121,7 @@ export function ProductsPage() {
                 />
               </div>
             </div>
-            <Button
-              onClick={handleAddProduct}
-              className="bg-lime-500 hover:bg-lime-600 text-gray-900"
-            >
+            <Button onClick={handleAddProduct} className="bg-lime-500 hover:bg-lime-600 text-gray-900">
               <PlusCircleIcon className="mr-2 h-4 w-4" />
               Add Product
             </Button>
@@ -144,10 +165,7 @@ export function ProductsPage() {
               </Table>
 
               <div className="mt-6 flex justify-center">
-                <Button
-                  onClick={() => navigate('/invoice')}
-                  className="bg-lime-500 hover:bg-lime-600 text-gray-900 px-8"
-                >
+                <Button onClick={generatePDFInvoice} className="bg-lime-500 hover:bg-lime-600 text-gray-900 px-8">
                   Generate PDF Invoice
                 </Button>
               </div>
